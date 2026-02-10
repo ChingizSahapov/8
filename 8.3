@@ -1,0 +1,69 @@
+package main
+
+import (
+ "fmt"
+ "math"
+)
+
+type Shape interface {
+ Area() float64     
+ Perimeter() float64 
+}
+
+type Rectangle struct {
+ Width  float64
+ Height float64
+}
+
+func (r Rectangle) Area() float64 {
+ return r.Width * r.Height
+}
+
+func (r Rectangle) Perimeter() float64 {
+ return 2 * (r.Width + r.Height)
+}
+
+type Circle struct {
+ Radius float64
+}
+
+func (c Circle) Area() float64 {
+ return math.Pi * c.Radius * c.Radius
+}
+
+func (c Circle) Perimeter() float64 {
+ return 2 * math.Pi * c.Radius
+}
+
+type Triangle struct {
+ SideA float64
+ SideB float64
+ SideC float64
+}
+
+func (t Triangle) Area() float64 {
+ p := (t.SideA + t.SideB + t.SideC) / 2 
+ return math.Sqrt(p * (p - t.SideA) * (p - t.SideB) * (p - t.SideC))
+}
+
+func (t Triangle) Perimeter() float64 {
+ return t.SideA + t.SideB + t.SideC
+}
+
+func main() {
+ rectangle := Rectangle{Width: 5, Height: 10}
+ circle := Circle{Radius: 3}
+ triangle := Triangle{SideA: 3, SideB: 4, SideC: 5}
+
+ fmt.Printf("Прямоугольник:\n")
+ fmt.Printf("  Площадь: %.2f\n", rectangle.Area())
+ fmt.Printf("  Периметр: %.2f\n", rectangle.Perimeter())
+
+ fmt.Printf("\nКруг:\n")
+ fmt.Printf("  Площадь: %.2f\n", circle.Area())
+ fmt.Printf("  Периметр: %.2f\n", circle.Perimeter())
+
+ fmt.Printf("\nТреугольник:\n")
+ fmt.Printf("  Площадь: %.2f\n", triangle.Area())
+ fmt.Printf("  Периметр: %.2f\n", triangle.Perimeter())
+}
