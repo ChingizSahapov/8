@@ -1,0 +1,72 @@
+package main
+
+import (
+ "fmt"
+ "net/mail"
+ "strings"
+)
+
+type Field struct {
+ Name      string
+ Value     string
+ Validators []Validator
+}
+
+type Validator interface {
+ Validate(field Field) error
+}
+
+type RequiredValidator struct{}
+
+func (v RequiredValidator) Validate(field Field) error {
+ if strings.TrimSpace(field.Value) == "" {
+  return fmt.Errorf("поле '%s' обязательно", field.Name)
+ }
+ return nil
+}
+
+type EmailValidator struct{}
+
+func (v EmailValidator) Validate(field Field) error {
+ _, err := mail.ParseAddress(field.Value)
+ if err != nil {
+  return fmt.Errorf("поле '%s' имеет неверный формат", field.Name)
+ }
+ return nil
+}
+
+type Form struct {
+ Fields []Field
+}
+
+func (f *Form) Validate() []error {
+ errors := []error{}
+ for _, field := range f.Fields {
+  for _, validator := range field.Validators {
+   if err := validator.Validate(field); err != nil {
+    errors = append(errors, err)
+   }
+  }
+ }
+ return errors
+}
+
+func main() {
+ form := Form{
+  Fields: []Field{
+   {Name: "Email", Value: "67Obabkov1488@mail.ru", Validators: []Validator{RequiredValidator{}, EmailValidator{}}},
+   {Name: "Name", Value: "Степа", Validators: []Validator{RequiredValidator{}}},
+  },
+ }
+
+ errors := form.Validate()
+
+ if len(errors) > 0 {
+  fmt.Println("Ошибки валидации:")
+  for _, err := range errors {
+   fmt.Println("-", err)
+  }
+ } else {
+  fmt.Println("Форма прошла валидацию успешно!")
+ }
+}
