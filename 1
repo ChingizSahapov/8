@@ -1,0 +1,51 @@
+package main
+
+import (
+        "fmt"
+        "os"
+)
+
+type Logger interface {
+        Info(msg string)
+        Error(msg string)
+        Debug(msg string)
+}
+
+type ConsoleLogger struct{}
+
+func (c ConsoleLogger) Info(msg string)  { fmt.Println("INFO:", msg) }
+func (c ConsoleLogger) Error(msg string) { fmt.Println("ERROR:", msg) }
+func (c ConsoleLogger) Debug(msg string) { fmt.Println("DEBUG:", msg) }
+
+type FileLogger struct {
+        file *os.File
+}
+
+func NewFileLogger(filename string) (*FileLogger, error) {
+        file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+        if err != nil {
+                return nil, err
+        }
+        return &FileLogger{file: file}, nil
+}
+
+func (f FileLogger) Info(msg string)  { fmt.Fprintln(f.file, "INFO:", msg) }
+func (f FileLogger) Error(msg string) { fmt.Fprintln(f.file, "ERROR:", msg) }
+func (f FileLogger) Debug(msg string) { fmt.Fprintln(f.file, "DEBUG:", msg) }
+
+func (f FileLogger) Close() error {
+        return f.file.Close()
+}
+
+func main() {
+        logger := ConsoleLogger{}
+        logger.Info("Это информационное сообщение")
+        logger.Error("Это сообщение об ошибке")
+        logger.Debug("Это отладочное сообщение")
+
+        fileLogger, _ := NewFileLogger("log.txt")
+        defer fileLogger.Close()
+        fileLogger.Info("Файл: всё работает")
+        fileLogger.Error("Файл: ошибка подключения")
+        fileLogger.Debug("Файл: переменная x = 10")
+}
